@@ -21,7 +21,8 @@ type test_state =
 
 exception Game_Over
 
-let width, height = (64, 64)
+let width, height = (320, 240)
+let num_size = 15
 
 let blue   = (0, 0, 255)
 let green  = (0, 255, 0)
@@ -127,11 +128,11 @@ let display renderer numbers_tex test_state =
   | Visualise ns ->
       List.iter (fun (c, n, (x, y)) ->
         let tex = List.assoc c numbers_tex in
-        draw_number tex x y 5;
+        draw_number tex x y num_size;
       ) ns;
   | Hidden (n, ns) ->
       List.iter (fun (c, n, (x, y)) ->
-        draw_square x y 5;
+        draw_square x y num_size;
       ) ns;
   end;
 
@@ -169,13 +170,13 @@ let point_in_rect ~p:(x, y) ~r =
 let does_hit n (x, y) ns =
   match ns with
   | (_, _n, (_x, _y)) :: [] ->
-      let r = Rect.make4 _x _y 5 5 in
+      let r = Rect.make4 _x _y num_size num_size in
       if (*Rect.*)point_in_rect ~p:(x, y) ~r
       then (print_endline "Congratulation!"; Sdl.quit (); exit 0)
       else raise Game_Over
 
   | (_, _n, (_x, _y)) :: tail ->
-      let r = Rect.make4 _x _y 5 5 in
+      let r = Rect.make4 _x _y num_size num_size in
       _n = n && (*Rect.*)point_in_rect ~p:(x, y) ~r
   | [] ->
       assert false
@@ -243,13 +244,13 @@ let collide (_, _, (x1, y1)) (_, _, (x2, y2)) =
   let a = {
     Rect.x = x1;
     Rect.y = y1;
-    Rect.w = 5;
-    Rect.h = 5;
+    Rect.w = num_size;
+    Rect.h = num_size;
   } and b = {
     Rect.x = x2;
     Rect.y = y2;
-    Rect.w = 5;
-    Rect.h = 5;
+    Rect.w = num_size;
+    Rect.h = num_size;
   } in
   Rect.has_intersection ~a ~b
 
@@ -262,8 +263,8 @@ let collision num numbers =
 
 let new_number i =
   let n = succ i in
-  let x = Random.int (width - 5) in
-  let y = Random.int (height - 5) in
+  let x = Random.int (width - num_size) in
+  let y = Random.int (height - num_size) in
   let c = (Printf.sprintf "%d" n).[0] in
   (c, n, (x, y))
 
@@ -283,7 +284,7 @@ let () =
   Random.self_init ();
   Sdl.init [`VIDEO];
   let window, renderer =
-    Render.create_window_and_renderer ~width:(width*2) ~height:(height*2) ~flags:[]
+    Render.create_window_and_renderer ~width ~height ~flags:[]
   in
   Render.set_logical_size2 renderer width height;
   Window.set_title ~window ~title:"Chimp Test";
